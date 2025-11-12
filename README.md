@@ -1,3 +1,5 @@
+LXC CONTAINERS
+
 The project demonstrates a LXC-based mini-infrastructure for testing and development purposes.
 It allows you to create, view, and delete containers in an isolated network with predefined configurations.
 
