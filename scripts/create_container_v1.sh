@@ -12,6 +12,10 @@ GW="10.126.0.1"
 RAM=1024    # in MB
 CPU=2       # CPU shares ratio
 
+#GitLab internal registry URL (on-prem)
+APP_DIR="/opt/app"
+GITLAB_REPO_URL="git@gitlab.company.local:test/storage_ops.git"
+
 # container_id:hostname:ip_address
 containers=(
   "101:delayedoperations_test:10.126.0.101/24"
@@ -65,5 +69,14 @@ EOF
     lxc-info -n "$CTID"
     echo
 done
+
+lxc-attach -n "$CTID" -- bash -c "
+  mkdir -p $APP_DIR
+  if [ -z \"\$(ls -A $APP_DIR)\" ]; then
+    git clone $GITLAB_REPO_URL $APP_DIR
+  else
+    echo "stop clone, directory not empty"
+  fi
+"
 
 echo "Container created and started."

@@ -8,6 +8,10 @@ set -euo pipefail
 CONFIG_DIR="./configs"
 LXC_IMAGE="/var/lib/lxc/lxc-images/alma_test.tar.gz"
 
+#GitLab internal registry URL (on-prem)
+APP_DIR="/opt/app"
+GITLAB_REPO_URL="git@gitlab.company.local:test/storage_ops.git"
+
 # Map container name → ID
 declare -A containers=(
   [storageservice]="101"
@@ -50,6 +54,15 @@ for name in "${!containers[@]}"; do
     # Show info
     lxc-info -n "$CTID"
 done
+
+lxc-attach -n "$CTID" -- bash -c "
+  mkdir -p $APP_DIR
+  if [ -z \"\$(ls -A $APP_DIR)\" ]; then
+    git clone $GITLAB_REPO_URL $APP_DIR
+  else
+    echo "stop clone, directory not empty"
+  fi
+"
 
 echo
 echo "All containers have been created and started!"
