@@ -25,7 +25,6 @@ for name in "${!containers[@]}"; do
     CONFIG_FILE="$CONFIG_DIR/${name}.cfg"
     CONTAINER_DIR="/var/lib/lxc/$CTID"
 
-    echo
     echo "----------------------------------------"
     echo "Creating container: $CTID ($name)"
 

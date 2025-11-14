@@ -1,7 +1,6 @@
-LXC CONTAINERS
+# LXC Lab Cluster
 
-The project demonstrates a LXC-based mini-infrastructure for testing and development purposes.
-It allows you to create, view, and delete containers in an isolated network with predefined configurations.
+A lightweight infrastructure automation tool for rapidly deploying and managing LXC containers with predefined configurations. Perfect for testing environments, development setups, and small-scale container orchestration.
 
 Purpose: Quickly deploy multiple containers with specific network and resource settings without manual configuration.
 
@@ -20,14 +19,13 @@ Purpose: Quickly deploy multiple containers with specific network and resource s
 └── README.md 
 ```
 
-**Requirements**
+# Requirements
 
-Linux host with LXC (lxc, lxc-utils) installed.
+- Linux host with LXC (lxc, lxc-utils) installed
+- Root privileges for container management
+- Pre-created LXC image (.tar.gz) in `/var/lib/lxc/lxc-images/` (path configurable in scripts)
 
-Root privileges to create and manage containers.
-
-Pre-created LXC image (.tar.gz) in /var/lib/lxc/lxc-images/ (or change the path in the scripts).
-
+## Quick Start
 **Usage**
 
 1. Creating containers
@@ -51,15 +49,49 @@ Displays the name, hostname, status, and IP.
 Stops and removes the containers specified in the script.
 Safe to run even if the container does not exist.
 
-**Network Notes**
+## Container Configurations
 
-Overview
+Configuration files define container properties:
+- Root filesystem path
+- Hostname (UTS name)
+- Network settings (IP, gateway)
+- Environment variables
+- Resource limits (memory, CPU)
 
-This document describes the network setup used for the LXC containers in this project.
-All containers are connected to a private bridge network lxcbr1 with subnet 10.126.0.0/24.
+Example configuration:
+```ini
+# LXC config for StorageService
+lxc.rootfs.path = /var/lib/lxc/storageservice/rootfs
+lxc.uts.name = storageservice
+lxc.net.0.type = veth
+lxc.net.0.link = lxcbr1
+lxc.net.0.flags = up
+lxc.net.0.ipv4.address = 10.126.0.102/24
+lxc.net.0.ipv4.gateway = 10.126.0.1
+lxc.environment = DATABASE_URL=mongodb://user:password@10.126.0.200:27017/test
+lxc.cgroup2.memory.max = 4096M
+lxc.cgroup2.cpu.max = 200000 100000
+```
 
-Bridge Configuration
+## Scripts Overview
 
-Bridge name: lxcbr1
-Subnet: 10.126.0.0/24
-Gateway: 10.126.0.1
+### create_container_v1.sh
+Legacy script with hardcoded container definitions. Creates two containers with predefined settings.
+
+### create_container_v2.sh
+Modern script that reads configurations from the [cfg/](file:///home/myuser/lxc-lab-cluster/cfg/) directory. More flexible and maintainable approach.
+
+### list_container.sh
+Lists all containers with their status and network information.
+
+### remove_countainer.sh
+Safely removes all configured containers. Checks for container existence before attempting removal.
+
+## Network Configuration
+
+All containers are connected to a private bridge network:
+- **Bridge Name**: lxcbr1
+- **Subnet**: 10.126.0.0/24
+- **Gateway**: 10.126.0.1
+
+Each container gets a static IP assignment as defined in its configuration file.
